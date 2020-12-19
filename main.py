@@ -111,21 +111,7 @@ try:
 					winner = p1
 					loser = p2
 
-		if draw:
-			pass
-		else:
-			"""
-			winner[F_IP] = 0
-			winner[F_GAS] = STARTGAS
-			#if random() > len(queue)/30:
-			queue.append(winner)
-			if random() > len(queue)/30:
-				queue.append(mutate(winner))
-			if has_output:
-				if random() > len(queue)/30:
-					queue.append(mutate(loser))
-			"""
-
+		# TODO
 		gasdelta = winner[F_GAS] - STARTGAS
 
 		winnercode = entuple(winner[F_CODE])

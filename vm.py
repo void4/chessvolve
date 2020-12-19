@@ -34,17 +34,6 @@ def execute(output, state):
 		# Assuming no refills
 		steps_done = start_steps - state[F_GAS]
 
-		# pseudo-gravity
-		"""
-		if steps_done % 20 == 0:
-			if state[F_Y] < H-1:
-				state[F_Y] = (state[F_Y]+1)%H
-		"""
-
-		# Uncomment this to see the program state and stack each step
-		#print("STATE:", state)
-		#print("STACK:", stack)
-
 		steps = state[F_GAS]
 		ip = state[F_IP]
 		code = state[F_CODE]
