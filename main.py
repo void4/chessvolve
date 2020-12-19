@@ -17,7 +17,7 @@ def num(board):
 
 index = 0
 
-MAXPOOL = 30
+MAXPOOL = 20
 
 pool = {}
 best = None
@@ -40,7 +40,16 @@ def get_player():
 		else:
 			return generate_random()
 
+
+
 games = 0
+
+columns = "abcdefgh"
+rows = "12345678"
+promotions = "qrbn"
+
+def bitToSquare(b):
+	return columns[b & 0x7] + rows[(b>>3) & 0x7]
 
 try:
 	while True:
@@ -49,8 +58,6 @@ try:
 		p2 = get_player()
 
 		board = chess.Board()
-
-
 
 		out = defaultdict(list)
 
@@ -71,8 +78,27 @@ try:
 				#print("OUTPUT", value)
 				#out.append(value)
 				#out[entuple(active[F_CODE])].append(value)
-				board.push(chess.Move.from_uci(legal[value%len(legal)]))
-				has_output = True
+				#move = chess.Move.from_uci(legal[value%len(legal)])
+
+				source = bitToSquare(value)
+				target = bitToSquare(value>>6)
+				print(source, target)
+				try:
+					piece_type = board.piece_type_at(chess.parse_square(source))
+
+					if piece_type == chess.PAWN and ((target[1] == "8" and board.turn == chess.WHITE) or (target[1] == "1" and board.turn == chess.BLACK)):
+						#Promotion
+						promotion = promotions[(value>>12)&0x3]
+					else:
+						promotion = ""
+
+					move = chess.Move.from_uci(source+target+promotion)
+					board.push(move)
+					has_output = True
+					return True
+				except (ValueError, AssertionError):
+					pass
+				return False
 
 			startgas = active[F_GAS]
 

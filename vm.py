@@ -118,7 +118,8 @@ def execute(output, state):
 			# Pop the topmost element from the stack and print it
 			#print("OUTPUT:", stack.pop(-1))
 			if len(stack) >= 1:
-				output(stack.pop(-1))
+				if not output(stack.pop(-1)):
+					break
 				OUTPUT = True
 		elif instr == I_JUMP:
 			if len(stack) >= 1:
