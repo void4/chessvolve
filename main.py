@@ -1,12 +1,14 @@
 import os
+import hashlib
 from time import time
 from random import random, choice
 from collections import Counter, defaultdict
-from trueskill import Rating, rate_1vs1
-from vm import execute, generate_random, mutate, F_GAS, splice, F_MEM, STARTGAS, F_IP, F_CODE, code_to_state
-import hashlib
 
 import chess
+from trueskill import Rating, rate_1vs1
+
+from vm import execute, generate_random, mutate, F_GAS, splice, F_MEM, STARTGAS, F_IP, F_CODE, code_to_state
+
 
 numbers = ".PNBRQKpnbrqk"
 

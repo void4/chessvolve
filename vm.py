@@ -3,7 +3,7 @@ from copy import deepcopy
 
 # Instruction numbers
 NUMINSTR = 7
-I_PUSH, I_ADD, I_PRINT, I_JUMP, I_SUB, I_IP, I_MEMREAD = range(NUMINSTR)#, I_MEMWRITE#I_RANDOM,
+I_PUSH, I_ADD, I_MOVE, I_JUMP, I_SUB, I_IP, I_MEMREAD = range(NUMINSTR)#, I_MEMWRITE#I_RANDOM,
 
 CELL_SIZE = 256
 CELL_MAX = CELL_SIZE-1
@@ -83,7 +83,7 @@ def execute(output, state):
 		#	if len(stack) >= 2:
 		#		state[F_MEM][stack.pop(-1)%len(state[F_MEM])] = stack.pop(-1)
 		#TODO allow allocating memory? fixed size? read only area for input state?
-		elif instruction == I_PRINT:
+		elif instruction == I_MOVE:
 			# Pop the topmost element from the stack and print it
 			#print("OUTPUT:", stack.pop(-1))
 			if len(stack) >= 1:
@@ -137,10 +137,3 @@ def splice(code1, code2):
 	first, second = (code1, code2) if randint(0,1) == 0 else (code2, code1)
 	code = first[:index] + second[index:]
 	return code
-
-if __name__ == "__main__":
-	# full runtime state of a process
-	# number of remaining steps, instruction pointer, instruction list
-	state_example = [100, 0, 0, 0, 0, [[I_PUSH, 1], [I_PUSH, 2], [I_ADD], [I_PRINT], [I_JUMP]]]
-
-	execute(state_example)
