@@ -2,8 +2,8 @@ from random import randint, choice
 from copy import deepcopy
 
 # Instruction numbers
-NUMINSTR = 8
-I_PUSH, I_ADD, I_PRINT, I_JUMP, I_SUB, I_IP, I_RANDOM, I_MEMREAD = range(NUMINSTR)#, I_MEMWRITE
+NUMINSTR = 7
+I_PUSH, I_ADD, I_PRINT, I_JUMP, I_SUB, I_IP, I_MEMREAD = range(NUMINSTR)#, I_MEMWRITE#I_RANDOM,
 
 CELL_SIZE = 256
 CELL_MAX = CELL_SIZE-1
@@ -13,8 +13,10 @@ CELL_MIN = 0
 NUMFIELDS = 4
 F_GAS, F_IP, F_CODE, F_MEM = range(NUMFIELDS)
 
-STARTGAS = 512
-CODEGEN = 256
+SC = 10
+
+STARTGAS = 512*SC
+CODEGEN = 256*SC
 
 def execute(output, state):
 
@@ -92,8 +94,8 @@ def execute(output, state):
 				state[F_IP] = stack.pop(-1)
 		elif instruction == I_IP:
 			stack.append(ip)
-		elif instruction == I_RANDOM:
-			stack.append(randint(0,255))
+		#elif instruction == I_RANDOM:
+		#	stack.append(randint(0,255))
 		# Move the instruction pointer one step forward to point to the next instruction
 		state[F_IP] += 1
 
