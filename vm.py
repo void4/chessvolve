@@ -145,15 +145,17 @@ def code_to_state(code):
 def random_instruction():
 	instr = randint(0, NUMINSTR-1)
 	if instr == I_PUSH:
-		block = [I_PUSH, randint(0,CELL_MAX)]
+		block = (I_PUSH, randint(0,CELL_MAX))
 	else:
-		block = [instr]
+		block = (instr,)
 	return block
 
 def generate_random():
 	code = []
 	for i in range(CODEGEN):
 		code += random_instruction()
+
+	code = tuple(code)
 
 	return code_to_state(code)
 

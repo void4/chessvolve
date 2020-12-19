@@ -36,7 +36,7 @@ def get_player():
 		return code_to_state(choice(list(pool.keys())))
 	else:
 		if random() < 0.5 and len(pool) > 2:
-			return code_to_state(mutate(splice(list(choice(list(pool.keys()))), list(choice(list(pool.keys()))))))
+			return code_to_state(mutate(splice(choice(list(pool.keys())), choice(list(pool.keys())))))
 		else:
 			return generate_random()
 
@@ -103,7 +103,7 @@ try:
 			startgas = active[F_GAS]
 
 			stats = execute(output, active)
-			out[tuple(active[F_CODE])] = stats
+			out[active[F_CODE]] = stats
 
 			if not has_output:
 				#print("NO OUTPUT")
@@ -136,8 +136,8 @@ try:
 		# TODO
 		gasdelta = winner[F_GAS] - STARTGAS
 
-		winnercode = tuple(winner[F_CODE])
-		losercode = tuple(loser[F_CODE])
+		winnercode = winner[F_CODE]
+		losercode = loser[F_CODE]
 
 		#win, draw, loss
 		winnerdata = pool.get(winnercode, [Rating(), 0, 0, 0, []])
