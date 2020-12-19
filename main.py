@@ -23,12 +23,6 @@ pool = {}
 best = None
 queue = []
 
-def detuple(tt):
-	return [list(t) for t in tt]
-
-def entuple(ll):
-	return tuple(tuple(l) for l in ll)
-
 def get_player2():
 	global queue
 	if random() < len(queue)/30 and len(queue) > 0:
@@ -42,10 +36,11 @@ def get_player():
 		return code_to_state(choice(list(pool.keys())))
 	else:
 		if random() < 0.5 and len(pool) > 2:
-			return code_to_state(mutate(splice(detuple(choice(list(pool.keys()))), detuple(choice(list(pool.keys()))))))
+			return code_to_state(mutate(splice(list(choice(list(pool.keys()))), list(choice(list(pool.keys()))))))
 		else:
 			return generate_random()
 
+games = 0
 
 try:
 	while True:
@@ -82,7 +77,7 @@ try:
 			startgas = active[F_GAS]
 
 			stats = execute(output, active)
-			out[entuple(active[F_CODE])] = stats
+			out[tuple(active[F_CODE])] = stats
 
 			if not has_output:
 				#print("NO OUTPUT")
@@ -115,8 +110,8 @@ try:
 		# TODO
 		gasdelta = winner[F_GAS] - STARTGAS
 
-		winnercode = entuple(winner[F_CODE])
-		losercode = entuple(loser[F_CODE])
+		winnercode = tuple(winner[F_CODE])
+		losercode = tuple(loser[F_CODE])
 
 		#win, draw, loss
 		winnerdata = pool.get(winnercode, [Rating(), 0, 0, 0, []])
@@ -150,6 +145,9 @@ try:
 		toplist = toplist[:MAXPOOL]
 		for k,v in toplist:
 			print(hashlib.sha256(str(k).encode("ascii")).hexdigest()[:6], v)#, k[:10])
+
+		games += 1
+		print(games)#, toplist[0] if toplist else None)
 except KeyboardInterrupt:
 	pass
 
