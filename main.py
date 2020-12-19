@@ -7,7 +7,7 @@ from collections import Counter, defaultdict
 import chess
 from trueskill import Rating, rate_1vs1
 
-from vm import execute, generate_random, mutate, F_GAS, splice, F_MEM, STARTGAS, F_IP, F_CODE, code_to_state
+from vm import execute, generate_random, mutate, F_GAS, splice, F_MEM, F_GAMEMEM, STARTGAS, F_IP, F_CODE, code_to_state
 
 
 numbers = ".PNBRQKpnbrqk"
@@ -65,7 +65,7 @@ try:
 			mem = [len(legal)] + num(board)
 			active = p1 if board.turn == chess.WHITE else p2
 
-			active[F_MEM] = mem
+			active[F_GAMEMEM] = mem
 
 			has_output = False
 
@@ -75,13 +75,14 @@ try:
 				global has_output, pool
 				#print("OUTPUT", value)
 				#out.append(value)
-				out[entuple(active[F_CODE])].append(value)
+				#out[entuple(active[F_CODE])].append(value)
 				board.push(chess.Move.from_uci(legal[value%len(legal)]))
 				has_output = True
 
 			startgas = active[F_GAS]
 
-			execute(output, active)
+			stats = execute(output, active)
+			out[entuple(active[F_CODE])] = stats
 
 			if not has_output:
 				#print("NO OUTPUT")
@@ -172,7 +173,7 @@ while not board.is_game_over():
 		#print(board)
 		legal = sorted([x.uci() for x in list(board.generate_legal_moves())])
 		mem = [len(legal)] + num(board)
-		active[F_MEM] = mem
+		active[F_GAMEMEM] = mem
 
 		has_output = False
 

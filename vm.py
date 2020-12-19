@@ -1,22 +1,25 @@
 from random import randint, choice
+from collections import Counter
 from copy import deepcopy
 
 # Instruction numbers
-NUMINSTR = 7
-I_PUSH, I_ADD, I_MOVE, I_JUMP, I_SUB, I_IP, I_MEMREAD = range(NUMINSTR)#, I_MEMWRITE#I_RANDOM,
+NUMINSTR = 16
+I_PUSH, I_ADD, I_MOVE, I_JUMP, I_SUB, I_MUL, I_IP, I_GAMEREAD, I_MEMREAD, I_MEMWRITE, I_LSHIFT, I_RSHIFT, I_AND, I_OR, I_NOT, I_MOD = range(NUMINSTR)#I_RANDOM,
 
-CELL_SIZE = 256
+WORDSIZE = 16
+CELL_SIZE = 2**WORDSIZE
 CELL_MAX = CELL_SIZE-1
 CELL_MIN = 0
 
 # indexes of the state components
-NUMFIELDS = 4
-F_GAS, F_IP, F_CODE, F_MEM = range(NUMFIELDS)
+NUMFIELDS = 5
+F_GAS, F_IP, F_CODE, F_MEM, F_GAMEMEM = range(NUMFIELDS)
 
 SC = 10
 
 STARTGAS = 512*SC
 CODEGEN = 256*SC
+MEMSIZE = STARTGAS//10
 
 def execute(output, state):
 
@@ -25,6 +28,8 @@ def execute(output, state):
 
 	start_steps = state[F_GAS]
 	OUTPUT = False
+
+	stats = Counter()
 
 	while True:
 
@@ -53,6 +58,7 @@ def execute(output, state):
 			instruction = code[ip][0]
 			argument = None
 
+		stats[instruction] += 1
 
 		if instruction == I_PUSH:
 			# Push the argument to the top of the stack
@@ -60,17 +66,54 @@ def execute(output, state):
 		elif instruction == I_ADD:
 			# Pop the two topmost elements from the stack, add them and push the result back on the stack
 			if len(stack) >= 2:
-				stack.append(stack.pop(-1) + stack.pop(-1))
+				stack.append((stack.pop(-1) + stack.pop(-1))&CELL_MAX)
 		elif instruction == I_SUB:
 			# Pop the two topmost elements from the stack, subtract them and push the result back on the stack
 			if len(stack) >= 2:
-				stack.append(stack.pop(-1) - stack.pop(-1))
+				stack.append((stack.pop(-1) - stack.pop(-1))&CELL_MAX)
+		elif instruction == I_MUL:
+			# Pop the two topmost elements from the stack, subtract them and push the result back on the stack
+			if len(stack) >= 2:
+				stack.append((stack.pop(-1) * stack.pop(-1))&CELL_MAX)
+		elif instruction == I_MOD:
+			# Pop the two topmost elements from the stack, subtract them and push the result back on the stack
+			if len(stack) >= 2:
+				mod = stack.pop(-1)
+				if mod > 0:
+					stack.append(stack.pop(-1) % mod)
+		elif instruction == I_AND:
+			# Pop the two topmost elements from the stack, subtract them and push the result back on the stack
+			if len(stack) >= 2:
+				stack.append(stack.pop(-1) & stack.pop(-1))
+		elif instruction == I_OR:
+			# Pop the two topmost elements from the stack, subtract them and push the result back on the stack
+			if len(stack) >= 2:
+				stack.append(stack.pop(-1) | stack.pop(-1))
+		elif instruction == I_NOT:
+			# Pop the two topmost elements from the stack, subtract them and push the result back on the stack
+			if len(stack) >= 1:
+				stack.append((~stack.pop(-1))&CELL_MAX)
+		elif instruction == I_LSHIFT:
+			# Pop the two topmost elements from the stack, subtract them and push the result back on the stack
+			if len(stack) >= 2:
+				shift = stack.pop(-1)
+				if 0 < shift <= WORDSIZE:
+					stack.append((stack.pop(-1) << shift)&CELL_MAX)
+		elif instruction == I_RSHIFT:
+			# Pop the two topmost elements from the stack, subtract them and push the result back on the stack
+			if len(stack) >= 2:
+				shift = stack.pop(-1)
+				if shift > 0:
+					stack.append(stack.pop(-1) >> shift)
+		elif instruction == I_GAMEREAD:
+			if len(stack) >= 1:
+				stack.append(state[F_GAMEMEM][stack.pop(-1)%len(state[F_GAMEMEM])])
+		elif instruction == I_MEMWRITE:
+			if len(stack) >= 2:
+				state[F_MEM][stack.pop(-1)%len(state[F_MEM])] = stack.pop(-1)
 		elif instruction == I_MEMREAD:
 			if len(stack) >= 1:
 				stack.append(state[F_MEM][stack.pop(-1)%len(state[F_MEM])])
-		#elif instruction == I_MEMWRITE:
-		#	if len(stack) >= 2:
-		#		state[F_MEM][stack.pop(-1)%len(state[F_MEM])] = stack.pop(-1)
 		#TODO allow allocating memory? fixed size? read only area for input state?
 		elif instruction == I_MOVE:
 			# Pop the topmost element from the stack and print it
@@ -94,8 +137,10 @@ def execute(output, state):
 		# Print a newline after each iteration
 		#print("")
 
+	return stats
+
 def code_to_state(code):
-	return [STARTGAS, 0, code, []]
+	return [STARTGAS, 0, code, [0 for i in range(MEMSIZE)], []]
 
 def random_instruction():
 	instr = randint(0, NUMINSTR-1)
@@ -113,7 +158,7 @@ def generate_random():
 	return code_to_state(code)
 
 def mutate(code):
-	for i in range(len(code)//10):
+	for i in range(randint(0,len(code)-1)):
 		random_index = randint(0, len(code)-1)
 		code[random_index] = random_instruction()
 	# Replenish, reset
